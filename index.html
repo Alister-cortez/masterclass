@@ -1,0 +1,192 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@300;400;600&family=DM+Sans:wght@300;400&display=swap" rel="stylesheet">
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+
+    body {
+      background: #0d0d0d;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      min-height: 100vh;
+      padding: 1.5rem;
+    }
+
+    .card {
+      position: relative;
+      width: 100%;
+      max-width: 560px;
+      padding: 2rem 2.5rem;
+      background: #111;
+      border: 1px solid #1e1e1e;
+      overflow: hidden;
+      animation: fadeIn 0.8s ease forwards;
+      opacity: 0;
+    }
+
+    .card::before {
+      content: '';
+      position: absolute;
+      top: 0; left: 10%; right: 10%;
+      height: 1px;
+      background: linear-gradient(90deg, transparent, #c9a84c, transparent);
+    }
+
+    .card::after {
+      content: '';
+      position: absolute;
+      bottom: 0; left: 10%; right: 10%;
+      height: 1px;
+      background: linear-gradient(90deg, transparent, rgba(201,168,76,0.3), transparent);
+    }
+
+    .eyebrow {
+      font-family: 'DM Sans', sans-serif;
+      font-size: 0.6rem;
+      font-weight: 400;
+      letter-spacing: 0.25em;
+      text-transform: uppercase;
+      color: #c9a84c;
+      margin-bottom: 1rem;
+      opacity: 0;
+      animation: slideUp 0.6s ease 0.3s forwards;
+    }
+
+    .message {
+      font-family: 'Cormorant Garamond', serif;
+      font-size: clamp(1.5rem, 3.5vw, 2rem);
+      font-weight: 300;
+      color: #f0ebe0;
+      line-height: 1.3;
+      letter-spacing: 0.01em;
+      opacity: 0;
+      animation: slideUp 0.6s ease 0.5s forwards;
+    }
+
+    .message strong {
+      font-weight: 600;
+      color: #c9a84c;
+    }
+
+    .divider {
+      width: 32px;
+      height: 1px;
+      background: #c9a84c;
+      margin: 1rem 0;
+      opacity: 0;
+      animation: expandLine 0.6s ease 0.7s forwards;
+      transform-origin: left;
+      transform: scaleX(0);
+    }
+
+    .date-line {
+      font-family: 'DM Sans', sans-serif;
+      font-size: 0.72rem;
+      font-weight: 300;
+      letter-spacing: 0.12em;
+      color: #555;
+      text-transform: uppercase;
+      opacity: 0;
+      animation: slideUp 0.6s ease 0.9s forwards;
+    }
+
+    .live-pill {
+      display: none;
+      align-items: center;
+      gap: 6px;
+      background: rgba(201,168,76,0.08);
+      border: 1px solid rgba(201,168,76,0.25);
+      padding: 0.25rem 0.75rem;
+      width: fit-content;
+      margin-bottom: 1rem;
+      opacity: 0;
+      animation: slideUp 0.6s ease 0.1s forwards;
+    }
+
+    .live-pill.show { display: flex; }
+
+    .live-dot {
+      width: 5px; height: 5px;
+      background: #c9a84c;
+      border-radius: 50%;
+      animation: pulse 1.4s ease-in-out infinite;
+    }
+
+    .live-pill span {
+      font-family: 'DM Sans', sans-serif;
+      font-size: 0.58rem;
+      letter-spacing: 0.2em;
+      text-transform: uppercase;
+      color: #c9a84c;
+    }
+
+    @keyframes fadeIn {
+      to { opacity: 1; }
+    }
+
+    @keyframes slideUp {
+      from { opacity: 0; transform: translateY(10px); }
+      to   { opacity: 1; transform: translateY(0); }
+    }
+
+    @keyframes expandLine {
+      to { opacity: 1; transform: scaleX(1); }
+    }
+
+    @keyframes pulse {
+      0%, 100% { opacity: 1; }
+      50%       { opacity: 0.3; }
+    }
+  </style>
+</head>
+<body>
+  <div class="card">
+    <div class="live-pill" id="livePill">
+      <span class="live-dot"></span>
+      <span>Ao vivo hoje</span>
+    </div>
+    <div class="eyebrow">Masterclass · Medicina Felina</div>
+    <div class="message" id="msg">—</div>
+    <div class="divider"></div>
+    <div class="date-line" id="dateline"></div>
+  </div>
+
+  <script>
+    (function () {
+      var now = new Date();
+      var brasilia = new Date(now.getTime() + (-3 * 60 - (-now.getTimezoneOffset())) * 60000);
+      var dia = brasilia.getDay();
+      var hora = brasilia.getHours();
+      var isHoje = dia === 2 && hora < 19;
+
+      function proxTerca(d) {
+        var n = new Date(d);
+        var diff = (2 - n.getDay() + 7) % 7;
+        if (diff === 0) diff = 7;
+        n.setDate(n.getDate() + diff);
+        return n;
+      }
+
+      var meses = ['janeiro','fevereiro','março','abril','maio','junho','julho','agosto','setembro','outubro','novembro','dezembro'];
+
+      var msgEl      = document.getElementById('msg');
+      var dateEl     = document.getElementById('dateline');
+      var pillEl     = document.getElementById('livePill');
+
+      if (isHoje) {
+        pillEl.classList.add('show');
+        msgEl.innerHTML = 'A Masterclass é <strong>hoje às 20h</strong>';
+        dateEl.textContent = brasilia.getDate() + ' de ' + meses[brasilia.getMonth()] + ' · não perca';
+      } else {
+        var t = proxTerca(brasilia);
+        msgEl.innerHTML = 'Próxima terça-feira<br><strong>às 20h</strong>';
+        dateEl.textContent = t.getDate() + ' de ' + meses[t.getMonth()] + ' · salve na agenda';
+      }
+    })();
+  </script>
+</body>
+</html>
